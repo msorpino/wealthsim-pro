@@ -7,10 +7,12 @@ function switchMode(mode) {
     document.getElementById('goalSection').classList.toggle('hidden', mode === 'sim');
     document.getElementById('extraSections').classList.toggle('hidden', mode === 'goal');
     
-    document.getElementById('versamentoMensile').classList.remove('computed-field');
-    document.getElementById('tassoAnnuo').classList.remove('computed-field');
-    document.getElementById('versamentoMensile').readOnly = false;
-    document.getElementById('tassoAnnuo').readOnly = false;
+    const vMese = document.getElementById('versamentoMensile');
+    const tAnnuo = document.getElementById('tassoAnnuo');
+    vMese.classList.remove('computed-field');
+    tAnnuo.classList.remove('computed-field');
+    vMese.readOnly = false;
+    tAnnuo.readOnly = false;
 
     triggerCalc();
 }
@@ -33,16 +35,12 @@ function eseguiCalcoloInverso() {
     if (type === 'rate') {
         vMese.classList.add('computed-field');
         vMese.readOnly = true; tAnnuo.readOnly = false;
-        tAnnuo.classList.remove('computed-field');
-
         const r = (parseFloat(tAnnuo.value) || 0) / 100 / 12;
         let rate = (r === 0) ? (target - capIni) / n : (target - capIni * Math.pow(1 + r, n)) / ((Math.pow(1 + r, n) - 1) / r);
         vMese.value = Math.max(0, Math.round(rate));
     } else {
         tAnnuo.classList.add('computed-field');
         tAnnuo.readOnly = true; vMese.readOnly = false;
-        vMese.classList.remove('computed-field');
-
         const m = parseFloat(vMese.value) || 0;
         let tMin = -0.1, tMax = 2.0, tBest = 0.05;
         for(let i=0; i<60; i++) {
@@ -78,7 +76,12 @@ function aggiungiVariazione() {
     const l = document.getElementById('listaVariazioni');
     const d = document.createElement('div');
     d.className = "var-row";
-    d.innerHTML = `<input type="number" class="var-anno" placeholder="An"><input type="number" class="var-imp" placeholder="€/m"><button onclick="this.parentElement.remove(); calcola()" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold;">✕</button>`;
+    d.style.display = "flex"; d.style.gap = "5px"; d.style.marginBottom = "5px";
+    d.innerHTML = `
+        <input type="number" class="var-anno" placeholder="Anno" oninput="calcola()" style="flex:1;">
+        <input type="number" class="var-imp" placeholder="€/mese" oninput="calcola()" style="flex:1;">
+        <button onclick="this.parentElement.remove(); calcola()" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold;">✕</button>
+    `;
     l.appendChild(d);
 }
 
@@ -109,8 +112,8 @@ function calcola() {
     for (let a = 1; a <= anni; a++) {
         let tAnnuo, mixStr;
         if (usaLC) {
-            let sAz = parseFloat(document.getElementById('startAz').value)/100;
-            let eAz = parseFloat(document.getElementById('endAz').value)/100;
+            let sAz = (parseFloat(document.getElementById('startAz').value) || 0)/100;
+            let eAz = (parseFloat(document.getElementById('endAz').value) || 0)/100;
             let qAz = sAz + (eAz - sAz) * ((a-1)/(anni-1||1));
             tAnnuo = qAz * (parseFloat(document.getElementById('rendAzioni').value)/100) + (1-qAz) * (parseFloat(document.getElementById('rendObb').value)/100);
             mixStr = `<span class="asset-pill">${Math.round(qAz*100)}/${Math.round((1-qAz)*100)}</span>`;
@@ -203,8 +206,8 @@ function disegnaGrafico(l, c, v, s, mx, mn, stress, svoltaX) {
                 { label: 'Interesse Semplice', data: s, borderColor: '#3b82f6', borderWidth: 2, borderDash: [4,4], pointRadius: 0, fill: false },
                 { label: 'Totale Versato', data: v, borderColor: isD ? '#64748b' : '#94a3b8', borderWidth: 2, pointRadius: 0, fill: false },
                 ...(stress ? [
-                    { label: 'Stress Max', data: mx, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius:0 },
-                    { label: 'Stress Min', data: mn, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius:0 }
+                    { label: 'Stress Max (+4%)', data: mx, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius:0 },
+                    { label: 'Stress Min (-3%)', data: mn, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius:0 }
                 ] : [])
             ]
         },
