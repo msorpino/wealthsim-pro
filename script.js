@@ -13,8 +13,6 @@ function switchMode(mode) {
     tAnnuo.classList.remove('computed-field');
     vMese.readOnly = false;
     tAnnuo.readOnly = false;
-
-    triggerCalc();
 }
 
 function triggerCalc() {
@@ -59,7 +57,6 @@ function syncMix(stage, type) {
     const obb = document.getElementById(stage + 'Obb');
     if (type === 'az') obb.value = 100 - (parseInt(az.value) || 0);
     else az.value = 100 - (parseInt(obb.value) || 0);
-    calcola();
 }
 
 function toggleAdvanced() {
@@ -76,11 +73,10 @@ function aggiungiVariazione() {
     const l = document.getElementById('listaVariazioni');
     const d = document.createElement('div');
     d.className = "var-row";
-    d.style.display = "flex"; d.style.gap = "5px"; d.style.marginBottom = "5px";
     d.innerHTML = `
-        <input type="number" class="var-anno" placeholder="Anno" oninput="calcola()" style="flex:1;">
-        <input type="number" class="var-imp" placeholder="€/mese" oninput="calcola()" style="flex:1;">
-        <button onclick="this.parentElement.remove(); calcola()" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold;">✕</button>
+        <input type="number" class="var-anno" placeholder="Anno">
+        <input type="number" class="var-imp" placeholder="€/m">
+        <button onclick="this.parentElement.remove()" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:1.1rem;">✕</button>
     `;
     l.appendChild(d);
 }
@@ -92,6 +88,8 @@ function calcola() {
     const tassoTasse = (parseFloat(document.getElementById('tasse').value) || 0) / 100;
     const tassoInfl = (parseFloat(document.getElementById('inflazione').value) || 0) / 100;
     const usaLC = document.getElementById('usaLifeCycle').checked && currentMode === 'sim';
+    const usaStress = document.getElementById('usaStressTest').checked;
+    const usaNetto = document.getElementById('usaTasse').checked;
 
     let variazioni = {};
     document.querySelectorAll('.var-row').forEach(row => {
@@ -149,7 +147,7 @@ function calcola() {
 
     document.getElementById('totaleTabella').innerHTML = `<tr><td colspan="${usaLC?2:1}">FINALE</td><td>€${Math.round(totVersato).toLocaleString()}</td><td>€${Math.round(totVersato+intSempliceAccum).toLocaleString()}</td><td>€${Math.round(capLordo).toLocaleString()}</td><td>-</td></tr>`;
 
-    let netto = document.getElementById('usaTasse').checked ? capLordo - ((capLordo - totVersato) * tassoTasse) : capLordo;
+    let netto = usaNetto ? capLordo - ((capLordo - totVersato) * tassoTasse) : capLordo;
     let reale = netto / Math.pow(1 + tassoInfl, anni);
 
     document.getElementById("risultatoLordo").innerText = "€" + Math.round(capLordo).toLocaleString();
@@ -161,7 +159,7 @@ function calcola() {
     b.innerText = annoSvolta ? `Punto di Svolta: Anno ${annoSvolta} ⭐` : "Punto di Svolta: --";
     b.style.background = annoSvolta ? 'var(--fire)' : '#94a3b8';
 
-    disegnaGrafico(labels, dC, dV, dS, dMax, dMin, document.getElementById('usaStressTest').checked, annoSvolta);
+    disegnaGrafico(labels, dC, dV, dS, dMax, dMin, usaStress, annoSvolta);
 }
 
 function disegnaGrafico(l, c, v, s, mx, mn, stress, svoltaX) {
@@ -227,7 +225,10 @@ function disegnaGrafico(l, c, v, s, mx, mn, stress, svoltaX) {
 document.getElementById('theme-checkbox').addEventListener('change', (e) => {
     document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
     document.getElementById('theme-label').innerText = e.target.checked ? "Dark Mode" : "Light Mode";
-    calcola();
+    triggerCalc();
 });
 
-window.onload = () => switchMode('sim');
+window.onload = () => {
+    switchMode('sim');
+    triggerCalc(); // Caricamento iniziale
+};

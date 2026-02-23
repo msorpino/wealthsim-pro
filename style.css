@@ -40,8 +40,13 @@ input:checked + .slider:before { transform: translateX(16px); }
 .input-group input, select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-main); font-weight: 600; font-size: 0.82rem; }
 .computed-field { background: rgba(16, 185, 129, 0.1) !important; border-color: var(--accent) !important; color: var(--accent) !important; }
 
+/* FIX VARIAZIONI */
+.variations-container { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.var-row { display: flex; gap: 8px; align-items: center; width: 100%; box-sizing: border-box; }
+.var-row input { flex: 1; min-width: 0; padding: 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 0.75rem; }
+
 .info-tag { display: inline-block; width: 13px; height: 13px; background: var(--border); border-radius: 50%; text-align: center; font-size: 0.5rem; cursor: help; line-height: 13px; position: relative; }
-.info-tag:hover::after { content: attr(data-tooltip); position: absolute; background: #000; color: #fff; padding: 8px; border-radius: 6px; width: 180px; z-index: 100; font-size: 0.7rem; left: 20px; top: -10px; font-weight: 400; text-transform: none; }
+.info-tag:hover::after { content: attr(data-tooltip); position: absolute; background: #000; color: #fff; padding: 8px; border-radius: 6px; width: 200px; z-index: 100; font-size: 0.7rem; left: 20px; top: -10px; font-weight: 400; text-transform: none; }
 
 .top-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
 .stat-card { background: var(--card-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
@@ -49,6 +54,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 .stat-card.fire { border-top: 3px solid var(--fire); }
 .stat-card h2 { font-size: 1.1rem; margin-top: 3px; }
 .stat-card small { font-size: 0.6rem; font-weight: 800; color: var(--text-sec); text-transform: uppercase; }
+.stat-desc { font-size: 0.6rem; color: var(--text-sec); display: block; }
 
 .chart-container { height: 380px; }
 .badge-container { position: relative; display: inline-block; margin-bottom: 10px; }
@@ -63,4 +69,4 @@ td { padding: 10px; border-bottom: 1px solid var(--border); }
 tr.svolta { background: rgba(245, 158, 11, 0.08); }
 tfoot { font-weight: 800; background: rgba(16,185,129,0.05); }
 .asset-pill { padding: 2px 6px; border-radius: 6px; background: var(--accent); color: white; font-size: 0.6rem; }
-.btn-icon { background: var(--accent); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
+.btn-icon { background: var(--accent); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; }

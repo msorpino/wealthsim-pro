@@ -32,11 +32,11 @@
                     <h3>🎯 Simulazione Obiettivo</h3>
                     <div class="input-group">
                         <label>Capitale Target Finale (€)</label>
-                        <input type="number" id="goalCifra" value="100000" oninput="eseguiCalcoloInverso()">
+                        <input type="number" id="goalCifra" value="100000">
                     </div>
                     <div class="input-group" style="margin-top:12px;">
                         <label>Parametro da calcolare</label>
-                        <select id="goalType" onchange="eseguiCalcoloInverso()">
+                        <select id="goalType">
                             <option value="rate">Versamento Mensile Necessario</option>
                             <option value="yield">Rendimento Annuo Necessario</option>
                         </select>
@@ -48,22 +48,22 @@
                     <div class="input-grid">
                         <div class="input-group">
                             <label>Capitale Iniziale (€)</label>
-                            <input type="number" id="capitaleIniziale" value="10000" oninput="triggerCalc()">
+                            <input type="number" id="capitaleIniziale" value="10000">
                         </div>
                         <div class="input-group">
                             <label>Anni Totali</label>
-                            <input type="number" id="anni" value="20" oninput="triggerCalc()">
+                            <input type="number" id="anni" value="20">
                         </div>
                         <div class="input-group">
                             <label>Versamento Mensile (€)</label>
-                            <input type="number" id="versamentoMensile" value="200" oninput="triggerCalc()">
+                            <input type="number" id="versamentoMensile" value="200">
                         </div>
                         <div class="input-group">
                             <label>Rendimento % <span class="info-tag" data-tooltip="Il tasso di crescita medio annuo atteso dal tuo investimento.">?</span></label>
-                            <input type="number" id="tassoAnnuo" value="7" oninput="triggerCalc()">
+                            <input type="number" id="tassoAnnuo" value="7">
                         </div>
                     </div>
-                    <button class="btn-primary" onclick="triggerCalc()" style="margin-top: 15px; width: 100%;">🔄 Aggiorna Simulazione</button>
+                    <button id="mainUpdateBtn" class="btn-primary" onclick="triggerCalc()" style="margin-top: 15px; width: 100%;">🔄 Aggiorna Simulazione</button>
                 </div>
 
                 <div id="extraSections">
@@ -74,16 +74,16 @@
                         </div>
                         <div id="advanced-content" class="hidden" style="margin-top:15px;">
                             <div class="checkbox-group">
-                                <input type="checkbox" id="usaLifeCycle" onchange="toggleLifeCycleUI(); calcola();">
+                                <input type="checkbox" id="usaLifeCycle" onchange="toggleLifeCycleUI()">
                                 <label for="usaLifeCycle" style="font-weight:700; color:var(--accent);">
-                                    Ciclo di Vita <span class="info-tag" data-tooltip="Riduce automaticamente l'esposizione azionaria col tempo per proteggere il capitale.">?</span>
+                                    Ciclo di Vita <span class="info-tag" data-tooltip="Riduce automaticamente l'esposizione azionaria col tempo per proteggere il capitale dai crolli vicini al prelievo.">?</span>
                                 </label>
                             </div>
                             <div class="input-grid" style="margin-top:10px;">
-                                <div class="input-group"><label>Resa Az %</label><input type="number" id="rendAzioni" value="8" oninput="calcola()"></div>
-                                <div class="input-group"><label>Resa Obb %</label><input type="number" id="rendObb" value="3" oninput="calcola()"></div>
+                                <div class="input-group"><label>Resa Az %</label><input type="number" id="rendAzioni" value="8"></div>
+                                <div class="input-group"><label>Resa Obb %</label><input type="number" id="rendObb" value="3"></div>
                             </div>
-                            <p class="section-sub">Mix (Inizio/Fine)</p>
+                            <p class="section-sub">Asset Mix (Inizio/Fine)</p>
                             <div class="input-grid">
                                 <div class="input-group"><label>Az % Start</label><input type="number" id="startAz" value="100" oninput="syncMix('start', 'az')"></div>
                                 <div class="input-group"><label>Obb % Start</label><input type="number" id="startObb" value="0" oninput="syncMix('start', 'obb')"></div>
@@ -105,12 +105,12 @@
                 <div class="card">
                     <h3>Fisco e Inflazione</h3>
                     <div class="input-grid">
-                        <div class="input-group"><label>Tasse % <span class="info-tag" data-tooltip="Aliquota sulle plusvalenze (es. 26% azioni, 12.5% Titoli di Stato).">?</span></label><input type="number" id="tasse" value="26" oninput="triggerCalc()"></div>
-                        <div class="input-group"><label>Inflazione % <span class="info-tag" data-tooltip="L'aumento dei prezzi che riduce il valore reale dei soldi nel tempo.">?</span></label><input type="number" id="inflazione" value="2" oninput="triggerCalc()"></div>
+                        <div class="input-group"><label>Tasse % <span class="info-tag" data-tooltip="Aliquota sulle plusvalenze. In Italia solitamente 26% o 12.5% per Titoli di Stato.">?</span></label><input type="number" id="tasse" value="26"></div>
+                        <div class="input-group"><label>Inflazione % <span class="info-tag" data-tooltip="L'aumento dei prezzi che riduce il valore reale dei tuoi soldi nel tempo.">?</span></label><input type="number" id="inflazione" value="2"></div>
                     </div>
                     <div class="checkbox-group" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-                        <div><input type="checkbox" id="usaTasse" checked onchange="calcola()"> <label for="usaTasse">Simula Tassazione Netta</label></div>
-                        <div><input type="checkbox" id="usaStressTest" onchange="calcola()"> <label for="usaStressTest" style="color:var(--fire); font-weight:700;">Monte Carlo Stress Test <span class="info-tag" data-tooltip="Simula scenari di mercato volatili (+/- 4%).">?</span></label></div>
+                        <div><input type="checkbox" id="usaTasse" checked> <label for="usaTasse">Simula Tassazione Netta</label></div>
+                        <div><input type="checkbox" id="usaStressTest"> <label for="usaStressTest" style="color:var(--fire); font-weight:700;">Analisi Stress Monte Carlo <span class="info-tag" data-tooltip="Simula scenari di mercato volatili per vedere il range di risultati possibili.">?</span></label></div>
                     </div>
                 </div>
             </aside>
@@ -120,7 +120,7 @@
                     <div style="display: flex; justify-content: space-between;">
                         <div>
                             <h3 style="margin-top:0;">📊 Benvenuto in WealthSim Pro</h3>
-                            <p>Questo simulatore calcola la crescita del patrimonio usando l'<strong>interesse composto</strong>. Considera l'impatto fiscale e l'inflazione per mostrarti il <strong>potere d'acquisto reale</strong> futuro.</p>
+                            <p>Proietta il tuo patrimonio considerando <strong>interesse composto</strong>, <strong>tasse</strong> e <strong>inflazione</strong> per conoscere il tuo potere d'acquisto reale futuro.</p>
                         </div>
                         <button onclick="document.getElementById('infoBanner').style.display='none'" class="close-info">✕</button>
                     </div>
@@ -136,7 +136,7 @@
                 <div class="card chart-card">
                     <div class="badge-container">
                         <div id="puntoSvoltaBadge" class="badge">--</div>
-                        <div class="tooltip-text">Il <strong>Punto di Svolta</strong> è il momento in cui i rendimenti generati dagli interessi superano i versamenti mensili. I soldi lavorano più di te!</div>
+                        <div class="tooltip-text">Il <strong>Punto di Svolta</strong> è il momento in cui i rendimenti degli interessi superano i tuoi versamenti mensili. I soldi lavorano più di te!</div>
                     </div>
                     <div class="chart-container"><canvas id="graficoInteresse"></canvas></div>
                 </div>
