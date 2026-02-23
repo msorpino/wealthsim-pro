@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WealthSim Pro - Strategic Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <header>
+            <div class="logo">Wealth<span>Sim</span></div>
+            <div class="theme-switch-wrapper">
+                <span id="theme-label">Light Mode</span>
+                <label class="theme-switch">
+                    <input type="checkbox" id="theme-checkbox" />
+                    <div class="slider round"></div>
+                </label>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <aside class="sidebar">
+                <div class="mode-selector">
+                    <button id="btnModeSim" class="mode-btn active" onclick="switchMode('sim')">Proiezione</button>
+                    <button id="btnModeGoal" class="mode-btn" onclick="switchMode('goal')">Obiettivo</button>
+                </div>
+
+                <div id="goalSection" class="card goal-card hidden">
+                    <h3>🎯 Simulazione Obiettivo</h3>
+                    <div class="input-group">
+                        <label>Capitale Target Finale (€)</label>
+                        <input type="number" id="goalCifra" value="100000" oninput="eseguiCalcoloInverso()">
+                    </div>
+                    <div class="input-group" style="margin-top:12px;">
+                        <label>Parametro da calcolare</label>
+                        <select id="goalType" onchange="eseguiCalcoloInverso()">
+                            <option value="rate">Versamento Mensile Necessario</option>
+                            <option value="yield">Rendimento Annuo Necessario</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Parametri Base</h3>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>Capitale Iniziale (€)</label>
+                            <input type="number" id="capitaleIniziale" value="10000" oninput="triggerCalc()">
+                        </div>
+                        <div class="input-group">
+                            <label>Anni Totali</label>
+                            <input type="number" id="anni" value="20" oninput="triggerCalc()">
+                        </div>
+                        <div class="input-group">
+                            <label>Versamento Mensile (€)</label>
+                            <input type="number" id="versamentoMensile" value="200" oninput="triggerCalc()">
+                        </div>
+                        <div class="input-group">
+                            <label>Rendimento % <span class="info-tag" data-tooltip="Il tasso di crescita medio annuo atteso dal tuo investimento.">?</span></label>
+                            <input type="number" id="tassoAnnuo" value="7" oninput="triggerCalc()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="extraSections">
+                    <div class="card advanced-card">
+                        <div class="card-header-toggle" onclick="toggleAdvanced()">
+                            <h3 style="margin:0;">Strategia Avanzata</h3>
+                            <span id="advanced-icon">▼</span>
+                        </div>
+                        <div id="advanced-content" class="hidden" style="margin-top:15px;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="usaLifeCycle" onchange="toggleLifeCycleUI(); calcola();">
+                                <label for="usaLifeCycle" style="font-weight:700; color:var(--accent);">
+                                    Ciclo di Vita <span class="info-tag" data-tooltip="Riduce automaticamente l'esposizione azionaria col passare degli anni per proteggere il capitale vicino alla scadenza.">?</span>
+                                </label>
+                            </div>
+                            <div class="input-grid" style="margin-top:10px;">
+                                <div class="input-group"><label>Resa Azioni %</label><input type="number" id="rendAzioni" value="8" oninput="calcola()"></div>
+                                <div class="input-group"><label>Resa Obblig. %</label><input type="number" id="rendObb" value="3" oninput="calcola()"></div>
+                            </div>
+                            <p class="section-sub">Mix Iniziale (Oggi)</p>
+                            <div class="input-grid">
+                                <div class="input-group"><label>Az %</label><input type="number" id="startAz" value="100" oninput="syncMix('start', 'az')"></div>
+                                <div class="input-group"><label>Obb %</label><input type="number" id="startObb" value="0" oninput="syncMix('start', 'obb')"></div>
+                            </div>
+                            <p class="section-sub">Mix Finale (Scadenza)</p>
+                            <div class="input-grid">
+                                <div class="input-group"><label>Az %</label><input type="number" id="endAz" value="40" oninput="syncMix('end', 'az')"></div>
+                                <div class="input-group"><label>Obb %</label><input type="number" id="endObb" value="60" oninput="syncMix('end', 'obb')"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin:0;">Variazioni</h3>
+                            <button class="btn-icon" onclick="aggiungiVariazione()">+</button>
+                        </div>
+                        <div id="listaVariazioni" class="variations-container"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Fisco e Inflazione</h3>
+                    <div class="input-grid">
+                        <div class="input-group"><label>Tasse % <span class="info-tag" data-tooltip="Aliquota applicata sulla plusvalenza (es. 26% per azioni, 12.5% per Titoli di Stato).">?</span></label><input type="number" id="tasse" value="26" oninput="triggerCalc()"></div>
+                        <div class="input-group"><label>Inflazione % <span class="info-tag" data-tooltip="L'aumento dei prezzi che riduce il valore reale dei tuoi soldi nel tempo.">?</span></label><input type="number" id="inflazione" value="2" oninput="triggerCalc()"></div>
+                    </div>
+                    <div class="checkbox-group" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+                        <div><input type="checkbox" id="usaTasse" checked onchange="calcola()"> <label for="usaTasse">Simula Tassazione Capital Gain</label></div>
+                        <div><input type="checkbox" id="usaStressTest" onchange="calcola()"> <label for="usaStressTest" style="color:var(--fire); font-weight:700;">Analisi Stress Monte Carlo <span class="info-tag" data-tooltip="Simula scenari di mercato volatili (+/- 4%) per mostrarti i possibili risultati in periodi negativi o positivi.">?</span></label></div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="main-content">
+                <div class="card info-banner" id="infoBanner">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3 style="margin-top:0;">📊 Benvenuto in WealthSim Pro</h3>
+                            <p>Questo strumento calcola la crescita del tuo patrimonio utilizzando l'<strong>interesse composto</strong>. A differenza dei calcolatori semplici, WealthSim integra l'impatto fiscale e l'inflazione per darti una visione del <strong>potere d'acquisto reale</strong> che avrai in futuro.</p>
+                            <div class="info-tags-row">
+                                <span class="mini-tag">⭐ Interesse Composto</span>
+                                <span class="mini-tag">🛡️ Protezione Inflazione</span>
+                                <span class="mini-tag">🏛️ Calcolo Fiscale</span>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('infoBanner').style.display='none'" class="close-info">✕</button>
+                    </div>
+                </div>
+
+                <div class="top-stats">
+                    <div class="stat-card"><small>Lordo Finale</small><h2 id="risultatoLordo">€ 0</h2></div>
+                    <div class="stat-card"><small>Netto Tassato</small><h2 id="risultatoNettoTasse">€ 0</h2></div>
+                    <div class="stat-card highlight"><small>Valore Reale</small><h2 id="risultatoNettoReale">€ 0</h2><span class="stat-desc">Al netto dell'inflazione</span></div>
+                    <div class="stat-card fire"><small>Rendita Mensile</small><h2 id="renditaFuoco">€ 0</h2><span class="stat-desc">4% Safe Withdrawal Rate</span></div>
+                </div>
+
+                <div class="card chart-card">
+                    <div class="badge-container">
+                        <div id="puntoSvoltaBadge" class="badge">--</div>
+                        <div class="tooltip-text">Il <strong>Punto di Svolta</strong> è il momento magico in cui i rendimenti generati dai tuoi interessi superano i tuoi versamenti mensili. Da qui in poi, i soldi lavorano più di te!</div>
+                    </div>
+                    <div class="chart-container"><canvas id="graficoInteresse"></canvas></div>
+                </div>
+
+                <div class="card table-card">
+                    <div class="table-scroll"><table id="tabellaRisultati"><thead></thead><tbody></tbody><tfoot id="totaleTabella"></tfoot></table></div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
