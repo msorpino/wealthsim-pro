@@ -79,7 +79,7 @@
                             <div class="checkbox-group">
                                 <input type="checkbox" id="usaLifeCycle" onchange="toggleLifeCycleUI()">
                                 <label for="usaLifeCycle" style="font-weight:700; color:var(--accent);">
-                                    Ciclo di Vita <span class="info-tag" data-tooltip="Riduce il rischio (Azioni) man mano che ti avvicini alla fine, proteggendo i profitti. Attiva la tassazione mista intelligente.">?</span>
+                                    Ciclo di Vita <span class="info-tag" data-tooltip="Riduce il rischio (Azioni) man mano che ti avvicini alla fine, proteggendo i profitti.">?</span>
                                 </label>
                             </div>
                             <div class="input-grid" style="margin-top:10px;">
@@ -101,7 +101,7 @@
                             <h3 style="margin:0;">📈 Variazioni</h3>
                             <button class="btn-icon" onclick="aggiungiVariazione()">+</button>
                         </div>
-                        <p class="section-desc">Simula aumenti di stipendio o bonus annuali.</p>
+                        <p class="section-desc">Inserisci l'anno e il nuovo importo mensile (rimarrà attivo da quell'anno in poi).</p>
                         <div id="listaVariazioni" class="variations-container"></div>
                     </div>
                 </div>
@@ -123,7 +123,10 @@
                         <div><input type="checkbox" id="usaTasse" checked> <label for="usaTasse">Simula Tassazione Netta</label></div>
                         <div>
                             <input type="checkbox" id="usaStressTest"> 
-                            <label for="usaStressTest" style="color:var(--fire); font-weight:700;">Monte Carlo Stress Test <span class="info-tag" data-tooltip="Simula scenari di mercato pessimisti (-3%) e ottimisti (+4%) per darti un range di sicurezza.">?</span></label>
+                            <label for="usaStressTest" style="color:var(--fire); font-weight:700;">
+                                Monte Carlo Stress Test 
+                                <span class="info-tag" data-tooltip="Simula scenari di mercato pessimisti (-3%) e ottimisti (+4%) per darti un range di sicurezza.">?</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -131,12 +134,12 @@
 
             <section class="main-content">
                 <div class="card info-banner" id="infoBanner">
-                    <div style="display: flex; justify-content: space-between;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
                             <h3 style="margin-top:0;">📊 Benvenuto in WealthSim Pro</h3>
                             <p>Questo strumento ti permette di visualizzare la crescita del tuo patrimonio nel tempo. Puoi simulare <strong>piani di accumulo (PAC)</strong>, gestire il rischio con il <strong>Ciclo di Vita</strong> e vedere come <strong>tasse e inflazione</strong> impattano sulla tua ricchezza reale futura.</p>
                         </div>
-                        <button onclick="document.getElementById('infoBanner').style.display='none'" class="close-info">✕</button>
+                        <button onclick="document.getElementById('infoBanner').style.display='none'" class="close-info" title="Chiudi banner">×</button>
                     </div>
                 </div>
 
@@ -148,9 +151,15 @@
                 </div>
 
                 <div class="card chart-card">
-                    <div class="badge-container">
-                        <div id="puntoSvoltaBadge" class="badge">--</div>
-                        <div class="tooltip-text">✨ <strong>Il Punto di Svolta:</strong> Questo è il momento magico in cui i rendimenti generati dai tuoi soldi superano i tuoi versamenti mensili. Da qui in poi, il capitale lavora più duramente di te!</div>
+                    <div class="chart-header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div class="badge-container" style="position: relative;">
+                            <div id="puntoSvoltaBadge" class="badge">--</div>
+                            <div class="tooltip-text">✨ <strong>Il Punto di Svolta:</strong> Questo è il momento magico in cui i rendimenti generati dai tuoi soldi superano i tuoi versamenti mensili. Da qui in poi, il capitale lavora più duramente di te!</div>
+                        </div>
+                        <div class="compare-controls" style="display: flex; align-items: center; gap: 10px;">
+                            <div id="compareDelta" class="compare-badge hidden"></div>
+                            <button id="btnCompara" class="btn-outline" onclick="toggleComparison()">⚖️ Compara Scenari</button>
+                        </div>
                     </div>
                     <div class="chart-container"><canvas id="graficoInteresse"></canvas></div>
                 </div>
