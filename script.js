@@ -19,11 +19,48 @@ function switchMode(mode) {
     document.getElementById('btnModeGoal').classList.toggle('active', mode === 'goal');
     document.getElementById('goalSection').classList.toggle('hidden', mode === 'sim');
     document.getElementById('extraSections').classList.toggle('hidden', mode === 'goal');
+    triggerCalc();
 }
 
 function triggerCalc() {
     if (currentMode === 'goal') eseguiCalcoloInverso();
     else calcola();
+}
+
+function downloadPDF() {
+    const element = document.getElementById('report-area');
+    const btn = document.getElementById('btnDownloadPDF');
+    btn.innerText = "⏳ Generazione...";
+    updateReportSummary();
+    element.classList.add('is-generating-pdf');
+    const opt = {
+        margin: 0.3, filename: 'WealthSim_Report.pdf', image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save().then(() => {
+        element.classList.remove('is-generating-pdf');
+        btn.innerText = "📥 Scarica Report PDF";
+    });
+}
+
+function updateReportSummary() {
+    const grid = document.getElementById('pdf-summary-grid');
+    const varsList = document.getElementById('pdf-variations-list');
+    grid.innerHTML = `
+        <div><strong>Capitale Iniziale:</strong> €${document.getElementById('capitaleIniziale').value}</div>
+        <div><strong>Durata:</strong> ${document.getElementById('anni').value} anni</div>
+        <div><strong>Versamento Base:</strong> €${document.getElementById('versamentoMensile').value}/mese</div>
+        <div><strong>Rendimento Atteso:</strong> ${document.getElementById('tassoAnnuo').value}%</div>
+        <div><strong>Inflazione:</strong> ${document.getElementById('inflazione').value}%</div>
+        <div><strong>Tassazione:</strong> ${document.getElementById('tasse').value}%</div>`;
+    let vText = "";
+    document.querySelectorAll('.var-row').forEach(row => {
+        let a = row.querySelector('.var-anno').value;
+        let imp = row.querySelector('.var-imp').value;
+        if(a && imp) vText += `• Dall'anno ${a}: €${imp}/mese `;
+    });
+    varsList.innerHTML = vText ? `<strong>Variazioni Inserite:</strong> ${vText}` : "";
 }
 
 function toggleComparison() {
@@ -45,15 +82,9 @@ function toggleComparison() {
 }
 
 function eseguiCalcoloInverso() {
-    const target = cleanNum('goalCifra');
-    const anni = parseInt(document.getElementById('anni').value) || 1;
-    const capIni = cleanNum('capitaleIniziale');
-    const type = document.getElementById('goalType').value;
-    const n = anni * 12;
-
-    const vMeseInput = document.getElementById('versamentoMensile');
-    const tAnnuoInput = document.getElementById('tassoAnnuo');
-
+    const target = cleanNum('goalCifra'), anni = parseInt(document.getElementById('anni').value) || 1;
+    const capIni = cleanNum('capitaleIniziale'), type = document.getElementById('goalType').value, n = anni * 12;
+    const vMeseInput = document.getElementById('versamentoMensile'), tAnnuoInput = document.getElementById('tassoAnnuo');
     if (type === 'rate') {
         vMeseInput.classList.add('computed-field');
         const r = (parseFloat(tAnnuoInput.value) || 0) / 100 / 12;
@@ -64,8 +95,7 @@ function eseguiCalcoloInverso() {
         const m = cleanNum('versamentoMensile');
         let tMin = -0.1, tMax = 2.0, tBest = 0.05;
         for(let i=0; i<60; i++) {
-            let r = tBest / 12;
-            let fv = capIni * Math.pow(1 + r, n) + (r === 0 ? m * n : m * ((Math.pow(1 + r, n) - 1) / r));
+            let r = tBest / 12, fv = capIni * Math.pow(1 + r, n) + (r === 0 ? m * n : m * ((Math.pow(1 + r, n) - 1) / r));
             if (fv < target) tMin = tBest; else tMax = tBest;
             tBest = (tMin + tMax) / 2;
         }
@@ -75,8 +105,7 @@ function eseguiCalcoloInverso() {
 }
 
 function syncMix(stage, type) {
-    const az = document.getElementById(stage + 'Az');
-    const obb = document.getElementById(stage + 'Obb');
+    const az = document.getElementById(stage + 'Az'), obb = document.getElementById(stage + 'Obb');
     if (type === 'az') obb.value = 100 - (parseInt(az.value) || 0);
     else az.value = 100 - (parseInt(obb.value) || 0);
 }
@@ -94,72 +123,42 @@ function toggleLifeCycleUI() {
 }
 
 function aggiungiVariazione() {
-    const l = document.getElementById('listaVariazioni');
-    const d = document.createElement('div');
+    const l = document.getElementById('listaVariazioni'), d = document.createElement('div');
     d.className = "var-row";
     d.innerHTML = `
         <input type="number" class="var-anno" placeholder="Anno">
         <input type="text" class="var-imp" placeholder="€/m" oninput="formatCurrency(this)">
-        <button onclick="this.parentElement.remove()">✕</button>
-    `;
+        <button onclick="this.parentElement.remove(); triggerCalc();">✕</button>`;
     l.appendChild(d);
 }
 
 function calcola() {
-    const capIni = cleanNum('capitaleIniziale');
-    const versBase = cleanNum('versamentoMensile');
-    const anni = parseInt(document.getElementById('anni').value) || 1;
+    const capIni = cleanNum('capitaleIniziale'), versBase = cleanNum('versamentoMensile'), anni = parseInt(document.getElementById('anni').value) || 1;
     const tassoInfl = (parseFloat(document.getElementById('inflazione').value) || 0) / 100;
-    const usaLC = document.getElementById('usaLifeCycle').checked && currentMode === 'sim';
-    const usaStress = document.getElementById('usaStressTest').checked;
-    const usaNetto = document.getElementById('usaTasse').checked;
-
+    const usaLC = document.getElementById('usaLifeCycle').checked && currentMode === 'sim', usaStress = document.getElementById('usaStressTest').checked, usaNetto = document.getElementById('usaTasse').checked;
     let variazioni = {};
     document.querySelectorAll('.var-row').forEach(row => {
-        let a = parseInt(row.querySelector('.var-anno').value);
-        let imp = parseFloat(row.querySelector('.var-imp').value.replace(/\./g, ""));
+        let a = parseInt(row.querySelector('.var-anno').value), imp = parseFloat(row.querySelector('.var-imp').value.replace(/\./g, ""));
         if (!isNaN(a) && !isNaN(imp)) variazioni[a] = imp;
     });
-
-    const tbody = document.querySelector("#tabellaRisultati tbody");
-    const thead = document.querySelector("#tabellaRisultati thead");
-    
-    // HEADER: Colonna mix gestita inline in modo assoluto
-    thead.innerHTML = `<tr>
-        <th>Anno</th>
-        ${usaLC ? '<th>Asset Mix</th>' : ''}
-        <th>Versato</th>
-        <th>Int. Semplice</th>
-        <th>Cap. Lordo</th>
-        ${snapshot ? '<th>Delta vs Confronto</th>' : ''}
-        <th>Resa</th>
-    </tr>`;
-    
+    const tbody = document.querySelector("#tabellaRisultati tbody"), thead = document.querySelector("#tabellaRisultati thead"), tfoot = document.getElementById("totaleTabella");
+    thead.innerHTML = `<tr><th>Anno</th>${usaLC ? '<th>Asset Mix</th>' : ''}<th>Versato</th><th>Int. Semplice</th><th>Cap. Lordo</th>${snapshot ? '<th>Delta</th>' : ''}<th>Resa</th></tr>`;
     tbody.innerHTML = "";
-
-    let capLordo = capIni, totVersato = capIni, intSempliceAccum = 0;
-    let capMax = capIni, capMin = capIni;
-    let labels = ["T0"], dC = [capIni], dV = [capIni], dS = [capIni], dMax = [capIni], dMin = [capIni], annoSvolta = null;
-
-    let aliquotaFinalePesata = 0;
-    let currentVersMese = versBase; 
+    let capLordo = capIni, totVersato = capIni, intSempliceAccum = 0, labels = ["T0"], dC = [capIni], dV = [capIni], dS = [capIni], dMax = [capIni], dMin = [capIni], annoSvolta = null;
+    let capMax = capIni, capMin = capIni, aliquotaFinalePesata = 0, currentVersMese = versBase;
 
     for (let a = 1; a <= anni; a++) {
-        let tAnnuo, mixStr, qAz;
+        let tAnnuo, qAz;
         if (usaLC) {
-            let sAz = (parseFloat(document.getElementById('startAz').value) || 0)/100;
-            let eAz = (parseFloat(document.getElementById('endAz').value) || 0)/100;
+            let sAz = (parseFloat(document.getElementById('startAz').value) || 0)/100, eAz = (parseFloat(document.getElementById('endAz').value) || 0)/100;
             qAz = sAz + (eAz - sAz) * ((a-1)/(anni-1||1));
             tAnnuo = qAz * (parseFloat(document.getElementById('rendAzioni').value)/100) + (1-qAz) * (parseFloat(document.getElementById('rendObb').value)/100);
-            mixStr = `<span style="background:var(--accent); color:white; padding:2px 6px; border-radius:6px; font-size:0.6rem;">${Math.round(qAz*100)}/${Math.round((1-qAz)*100)}</span>`;
             if (a === anni) aliquotaFinalePesata = (qAz * 0.26) + ((1-qAz) * 0.125);
         } else {
             tAnnuo = (parseFloat(document.getElementById('tassoAnnuo').value) || 0) / 100;
             aliquotaFinalePesata = (parseFloat(document.getElementById('tasse').value) || 0) / 100;
         }
-
         if (variazioni[a] !== undefined) currentVersMese = variazioni[a];
-
         let inizioCap = capLordo, vAnno = 0;
         for (let m = 1; m <= 12; m++) {
             capLordo = (capLordo * (1 + tAnnuo/12)) + currentVersMese;
@@ -168,109 +167,69 @@ function calcola() {
             totVersato += currentVersMese; vAnno += currentVersMese;
             intSempliceAccum += (totVersato * (tAnnuo/12));
         }
-
         let resa = capLordo - inizioCap - vAnno;
         if(!annoSvolta && resa > vAnno) annoSvolta = a;
-        
         labels.push("A"+a); dC.push(capLordo); dV.push(totVersato); dS.push(totVersato + intSempliceAccum); dMax.push(capMax); dMin.push(capMin);
-
-        // DELTA CALCULATION
         let tdDeltaHTML = "";
-        if (snapshot) {
-            if (snapshot.data[a] !== undefined) {
-                let diff = capLordo - snapshot.data[a];
-                let diffStr = (diff >= 0 ? '+' : '') + Math.round(diff).toLocaleString('it-IT') + '€';
-                let color = diff >= 0 ? 'var(--accent)' : '#ef4444';
-                tdDeltaHTML = `<td style="color:${color}; font-weight:700;">${diffStr}</td>`;
-            } else {
-                tdDeltaHTML = `<td>-</td>`;
-            }
-        }
-
-        // ROW: Colonna mix gestita inline in modo assoluto
-        tbody.innerHTML += `<tr class="${annoSvolta === a ? 'svolta' : ''}">
-            <td>Anno ${a}</td>
-            ${usaLC ? `<td>${mixStr}</td>` : ''}
-            <td>€${Math.round(totVersato).toLocaleString('it-IT')}</td>
-            <td>€${Math.round(totVersato + intSempliceAccum).toLocaleString('it-IT')}</td>
-            <td><strong>€${Math.round(capLordo).toLocaleString('it-IT')}</strong></td>
-            ${snapshot ? tdDeltaHTML : ''}
-            <td style="color:var(--accent)">+€${Math.round(resa).toLocaleString('it-IT')}</td>
-        </tr>`;
+        if (snapshot && snapshot.data[a] !== undefined) {
+            let diff = capLordo - snapshot.data[a];
+            tdDeltaHTML = `<td style="color:${diff >= 0 ? 'var(--accent)' : '#ef4444'}; font-weight:700;">${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString('it-IT')}€</td>`;
+        } else if (snapshot) tdDeltaHTML = "<td>-</td>";
+        tbody.innerHTML += `<tr class="${annoSvolta === a ? 'svolta' : ''}"><td>Anno ${a}</td>${usaLC ? `<td>${Math.round(qAz*100)}/${Math.round((1-qAz)*100)}</td>` : ''}<td>€${Math.round(totVersato).toLocaleString('it-IT')}</td><td>€${Math.round(totVersato + intSempliceAccum).toLocaleString('it-IT')}</td><td><strong>€${Math.round(capLordo).toLocaleString('it-IT')}</strong></td>${snapshot ? tdDeltaHTML : ''}<td style="color:var(--accent)">+€${Math.round(resa).toLocaleString('it-IT')}</td></tr>`;
     }
 
-    // DELTA FINALE CALCULATION
-    let tdDeltaFinalHTML = "";
-    if (snapshot) {
-        let diffF = capLordo - snapshot.finalValue;
-        let diffStr = (diffF >= 0 ? '+' : '') + Math.round(diffF).toLocaleString('it-IT') + '€';
-        let color = diffF >= 0 ? 'var(--accent)' : '#ef4444';
-        tdDeltaFinalHTML = `<td style="color:${color}; font-weight:700;">${diffStr}</td>`;
-    }
-
-    // FOOTER: Il colspan e il delta si adattano in modo chirurgico
-    document.getElementById('totaleTabella').innerHTML = `<tr>
-        <td colspan="${usaLC ? 2 : 1}">RISULTATO FINALE</td>
+    // RIPRISTINO RIGA FINALE TOTALI
+    tfoot.innerHTML = `<tr>
+        <td>TOTALE</td>
+        ${usaLC ? '<td>-</td>' : ''}
         <td>€${Math.round(totVersato).toLocaleString('it-IT')}</td>
         <td>€${Math.round(totVersato + intSempliceAccum).toLocaleString('it-IT')}</td>
-        <td><strong>€${Math.round(capLordo).toLocaleString('it-IT')}</strong></td>
-        ${snapshot ? tdDeltaFinalHTML : ''}
+        <td>€${Math.round(capLordo).toLocaleString('it-IT')}</td>
+        ${snapshot ? '<td>-</td>' : ''}
         <td>-</td>
     </tr>`;
 
-    lastCalculatedLordo = capLordo; 
-    let plusvalenza = Math.max(0, capLordo - totVersato);
-    let netto = usaNetto ? capLordo - (plusvalenza * aliquotaFinalePesata) : capLordo;
-    let reale = netto / Math.pow(1 + tassoInfl, anni);
-
+    lastCalculatedLordo = capLordo;
+    let plusvalenza = Math.max(0, capLordo - totVersato), netto = usaNetto ? capLordo - (plusvalenza * aliquotaFinalePesata) : capLordo, reale = netto / Math.pow(1 + tassoInfl, anni);
     document.getElementById("risultatoLordo").innerText = "€" + Math.round(capLordo).toLocaleString('it-IT');
     document.getElementById("risultatoNettoTasse").innerText = "€" + Math.round(netto).toLocaleString('it-IT');
     document.getElementById("risultatoNettoReale").innerText = "€" + Math.round(reale).toLocaleString('it-IT');
     document.getElementById("renditaFuoco").innerText = "€" + Math.round((reale * 0.04) / 12).toLocaleString('it-IT');
-    
     const b = document.getElementById("puntoSvoltaBadge");
     b.innerText = annoSvolta ? `Punto di Svolta: Anno ${annoSvolta} ⭐` : "Punto di Svolta: --";
     b.style.background = annoSvolta ? 'var(--fire)' : '#94a3b8';
-
     if (snapshot) {
         let diff = capLordo - snapshot.finalValue;
-        const deltaEl = document.getElementById('compareDelta');
-        deltaEl.innerHTML = `Delta: <span style="color:${diff >= 0 ? 'var(--accent)' : '#ef4444'}">${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString('it-IT')}€</span>`;
+        document.getElementById('compareDelta').innerHTML = `Delta: <span style="color:${diff >= 0 ? 'var(--accent)' : '#ef4444'}">${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString('it-IT')}€</span>`;
     }
-
     disegnaGrafico(labels, dC, dV, dS, dMax, dMin, usaStress);
 }
 
 function disegnaGrafico(l, c, v, s, mx, mn, stress) {
     const ctx = document.getElementById('graficoInteresse').getContext('2d');
     if (mioGrafico) mioGrafico.destroy();
-    const isD = document.documentElement.getAttribute('data-theme') === 'dark';
-    const textC = isD ? '#f8fafc' : '#0f172a';
-
+    const isD = document.documentElement.getAttribute('data-theme') === 'dark', textC = isD ? '#f8fafc' : '#0f172a';
     let datasets = [
         { label: 'Capitale Lordo', data: c, borderColor: '#10b981', borderWidth: 3, tension: 0.3, fill: false },
         { label: 'Totale Versato', data: v, borderColor: '#ef4444', borderWidth: 2, pointRadius: 0, fill: false },
         { label: 'Interesse Semplice', data: s, borderColor: '#3b82f6', borderWidth: 1.5, borderDash: [4,4], pointRadius: 0, fill: false }
     ];
-
-    if (snapshot) {
-        datasets.push({ label: 'Confronto', data: snapshot.data, borderColor: '#94a3b8', borderWidth: 2, borderDash: [10, 5], pointRadius: 0, fill: false });
-    }
-
+    if (snapshot) datasets.push({ label: 'Confronto', data: snapshot.data, borderColor: '#94a3b8', borderWidth: 2, borderDash: [10, 5], pointRadius: 0, fill: false });
     if (stress) {
         datasets.push({ label: 'Stress Max (+4%)', data: mx, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius: 0 });
         datasets.push({ label: 'Stress Min (-3%)', data: mn, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius: 0 });
     }
-
     mioGrafico = new Chart(ctx, {
-        type: 'line',
-        data: { labels: l, datasets: datasets },
+        type: 'line', data: { labels: l, datasets: datasets },
         options: { 
-            responsive: true, maintainAspectRatio: false, 
-            plugins: { legend: { labels: { color: textC, font: { weight: '600' } } } },
+            responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+            plugins: { 
+                legend: { labels: { color: textC, font: { weight: '600' } } },
+                tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: €${Math.round(ctx.parsed.y).toLocaleString('it-IT')}` } }
+            },
             scales: { 
-                y: { ticks: { color: '#94a3b8' }, grid: { color: isD ? '#1e293b' : '#f1f5f9' } },
-                x: { ticks: { color: '#94a3b8' } }
+                y: { ticks: { color: '#94a3b8', callback: (v) => '€' + v.toLocaleString('it-IT') }, grid: { color: isD ? '#1e293b' : '#f1f5f9' } },
+                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
             }
         }
     });
@@ -281,5 +240,4 @@ document.getElementById('theme-checkbox').addEventListener('change', (e) => {
     document.getElementById('theme-label').innerText = e.target.checked ? "Dark Mode" : "Light Mode";
     triggerCalc();
 });
-
 window.onload = () => triggerCalc();

@@ -6,6 +6,7 @@
     <title>WealthSim Pro - Strategic Planner</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -132,14 +133,20 @@
                 </div>
             </aside>
 
-            <section class="main-content">
+            <section class="main-content" id="report-area">
+                <div id="pdf-header-data" class="pdf-only-block" style="display:none;">
+                    <h2 style="color:var(--accent); margin-bottom:10px;">WealthSim Pro - Report Strategico</h2>
+                    <div id="pdf-summary-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px; font-size:0.8rem;"></div>
+                    <div id="pdf-variations-list" style="margin-bottom:20px; font-size:0.75rem; color:#444;"></div>
+                </div>
+
                 <div class="card info-banner" id="infoBanner">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
                             <h3 style="margin-top:0;">📊 Benvenuto in WealthSim Pro</h3>
                             <p>Questo strumento ti permette di visualizzare la crescita del tuo patrimonio nel tempo. Puoi simulare <strong>piani di accumulo (PAC)</strong>, gestire il rischio con il <strong>Ciclo di Vita</strong> e vedere come <strong>tasse e inflazione</strong> impattano sulla tua ricchezza reale futura.</p>
                         </div>
-                        <button onclick="document.getElementById('infoBanner').style.display='none'" class="close-info" title="Chiudi banner">×</button>
+                        <button onclick="document.getElementById('infoBanner').style.display='none'" class="close-info">×</button>
                     </div>
                 </div>
 
@@ -159,6 +166,7 @@
                         <div class="compare-controls" style="display: flex; align-items: center; gap: 10px;">
                             <div id="compareDelta" class="compare-badge hidden"></div>
                             <button id="btnCompara" class="btn-outline" onclick="toggleComparison()">⚖️ Compara Scenari</button>
+                            <button id="btnDownloadPDF" class="btn-primary" onclick="downloadPDF()" style="padding: 6px 15px; font-size: 0.75rem;">📥 Scarica Report PDF</button>
                         </div>
                     </div>
                     <div class="chart-container"><canvas id="graficoInteresse"></canvas></div>
