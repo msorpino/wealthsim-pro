@@ -178,7 +178,6 @@ function calcola() {
         tbody.innerHTML += `<tr class="${annoSvolta === a ? 'svolta' : ''}"><td>Anno ${a}</td>${usaLC ? `<td>${Math.round(qAz*100)}/${Math.round((1-qAz)*100)}</td>` : ''}<td>€${Math.round(totVersato).toLocaleString('it-IT')}</td><td>€${Math.round(totVersato + intSempliceAccum).toLocaleString('it-IT')}</td><td><strong>€${Math.round(capLordo).toLocaleString('it-IT')}</strong></td>${snapshot ? tdDeltaHTML : ''}<td style="color:var(--accent)">+€${Math.round(resa).toLocaleString('it-IT')}</td></tr>`;
     }
 
-    // RIPRISTINO RIGA FINALE TOTALI
     tfoot.innerHTML = `<tr>
         <td>TOTALE</td>
         ${usaLC ? '<td>-</td>' : ''}
@@ -202,10 +201,10 @@ function calcola() {
         let diff = capLordo - snapshot.finalValue;
         document.getElementById('compareDelta').innerHTML = `Delta: <span style="color:${diff >= 0 ? 'var(--accent)' : '#ef4444'}">${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString('it-IT')}€</span>`;
     }
-    disegnaGrafico(labels, dC, dV, dS, dMax, dMin, usaStress);
+    disegnaGrafico(labels, dC, dV, dS, dMax, dMin, usaStress, annoSvolta); // Passaggio annoSvolta aggiunto
 }
 
-function disegnaGrafico(l, c, v, s, mx, mn, stress) {
+function disegnaGrafico(l, c, v, s, mx, mn, stress, annoSvolta) {
     const ctx = document.getElementById('graficoInteresse').getContext('2d');
     if (mioGrafico) mioGrafico.destroy();
     const isD = document.documentElement.getAttribute('data-theme') === 'dark', textC = isD ? '#f8fafc' : '#0f172a';
@@ -219,19 +218,61 @@ function disegnaGrafico(l, c, v, s, mx, mn, stress) {
         datasets.push({ label: 'Stress Max (+4%)', data: mx, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius: 0 });
         datasets.push({ label: 'Stress Min (-3%)', data: mn, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,0.08)', fill: 0, pointRadius: 0 });
     }
+    
     mioGrafico = new Chart(ctx, {
         type: 'line', data: { labels: l, datasets: datasets },
         options: { 
-            responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+            responsive: true, 
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false }, // Tooltip interattivo su tutto l'asse
+            scales: { 
+                y: { 
+                    ticks: { color: '#94a3b8', callback: (val) => '€' + val.toLocaleString('it-IT') }, 
+                    grid: { color: isD ? '#1e293b' : '#e2e8f0' } 
+                }, 
+                x: { ticks: { color: '#94a3b8' }, grid: { display: false } } 
+            }, 
             plugins: { 
                 legend: { labels: { color: textC, font: { weight: '600' } } },
-                tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: €${Math.round(ctx.parsed.y).toLocaleString('it-IT')}` } }
-            },
-            scales: { 
-                y: { ticks: { color: '#94a3b8', callback: (v) => '€' + v.toLocaleString('it-IT') }, grid: { color: isD ? '#1e293b' : '#f1f5f9' } },
-                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                tooltip: { 
+                    backgroundColor: isD ? '#0f172a' : '#fff', 
+                    titleColor: isD ? '#fff' : '#0f172a', 
+                    bodyColor: isD ? '#94a3b8' : '#64748b', 
+                    borderColor: '#e2e8f0', 
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) label += '€' + Math.round(context.parsed.y).toLocaleString('it-IT');
+                            return label;
+                        }
+                    }
+                }
+            } 
+        },
+        plugins: [{
+            id: 'verticalLine',
+            afterDraw: chart => {
+                if (annoSvolta) {
+                    const ctx = chart.ctx;
+                    const x = chart.scales.x.getPixelForValue("A" + annoSvolta);
+                    const topY = chart.scales.y.top;
+                    const bottomY = chart.scales.y.bottom;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x, topY);
+                    ctx.lineTo(x, bottomY);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.setLineDash([6, 4]);
+                    ctx.stroke();
+                    ctx.restore();
+                }
             }
-        }
+        }]
     });
 }
 
@@ -240,4 +281,5 @@ document.getElementById('theme-checkbox').addEventListener('change', (e) => {
     document.getElementById('theme-label').innerText = e.target.checked ? "Dark Mode" : "Light Mode";
     triggerCalc();
 });
+
 window.onload = () => triggerCalc();

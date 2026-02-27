@@ -79,6 +79,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
 .btn-outline:hover { background: rgba(16, 185, 129, 0.1); }
 .btn-outline.active { background: var(--accent); color: white; }
+
 .compare-badge { background: rgba(16, 185, 129, 0.1); border: 1px dashed var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
 
 .table-scroll { overflow-x: auto; margin-top: 10px; }
@@ -93,10 +94,6 @@ tfoot td { color: var(--text-main); padding: 12px 10px; }
 
 /* OTTIMIZZAZIONE PDF */
 .is-generating-pdf { background: white !important; width: 1000px !important; padding: 20px !important; }
-.is-generating-pdf header, 
-.is-generating-pdf .sidebar, 
-.is-generating-pdf .btn-outline, 
-.is-generating-pdf #btnDownloadPDF, 
-.is-generating-pdf .info-banner { display: none !important; }
+.is-generating-pdf header, .is-generating-pdf .sidebar, .is-generating-pdf .btn-outline, .is-generating-pdf #btnDownloadPDF, .is-generating-pdf .info-banner { display: none !important; }
 .is-generating-pdf .pdf-only-block { display: block !important; }
 .is-generating-pdf .card { box-shadow: none !important; border: 1px solid #eee !important; }
