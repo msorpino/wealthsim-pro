@@ -27,40 +27,75 @@ function triggerCalc() {
     else calcola();
 }
 
+// MODIFICA: Funzione download PDF potenziata
 function downloadPDF() {
     const element = document.getElementById('report-area');
     const btn = document.getElementById('btnDownloadPDF');
+    const originalText = btn.innerText;
+    
     btn.innerText = "⏳ Generazione...";
-    updateReportSummary();
+    updateReportSummary(); 
+    
     element.classList.add('is-generating-pdf');
+    
     const opt = {
-        margin: 0.3, filename: 'WealthSim_Report.pdf', image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        margin:       [0.3, 0.3], // Margini ridotti
+        filename:     'WealthSim_Strategic_Report.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true, 
+            logging: false,
+            // Importante per il rendering corretto dei font
+            letterRendering: true 
+        },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+        // Gestione avanzata dei salti di pagina
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
+
     html2pdf().set(opt).from(element).save().then(() => {
         element.classList.remove('is-generating-pdf');
-        btn.innerText = "📥 Scarica Report PDF";
+        btn.innerText = originalText;
     });
 }
 
+// MODIFICA: Raccolta completa di tutti gli input per il PDF
 function updateReportSummary() {
     const grid = document.getElementById('pdf-summary-grid');
     const varsList = document.getElementById('pdf-variations-list');
-    grid.innerHTML = `
-        <div><strong>Capitale Iniziale:</strong> €${document.getElementById('capitaleIniziale').value}</div>
-        <div><strong>Durata:</strong> ${document.getElementById('anni').value} anni</div>
-        <div><strong>Versamento Base:</strong> €${document.getElementById('versamentoMensile').value}/mese</div>
-        <div><strong>Rendimento Atteso:</strong> ${document.getElementById('tassoAnnuo').value}%</div>
-        <div><strong>Inflazione:</strong> ${document.getElementById('inflazione').value}%</div>
-        <div><strong>Tassazione:</strong> ${document.getElementById('tasse').value}%</div>`;
+    
+    const isLC = document.getElementById('usaLifeCycle').checked;
+    const rend = isLC ? "Ciclo di Vita Attivo" : document.getElementById('tassoAnnuo').value + "%";
+    
+    let summaryHTML = `
+        <div><strong>💰 Capitale Iniziale:</strong> €${document.getElementById('capitaleIniziale').value}</div>
+        <div><strong>📅 Durata:</strong> ${document.getElementById('anni').value} anni</div>
+        <div><strong>💵 Versamento Base:</strong> €${document.getElementById('versamentoMensile').value}/mese</div>
+        <div><strong>📈 Rendimento:</strong> ${rend}</div>
+        <div><strong>💸 Inflazione:</strong> ${document.getElementById('inflazione').value}%</div>
+        <div><strong>🏛️ Tassazione:</strong> ${document.getElementById('tasse').value}%</div>
+    `;
+
+    if (isLC) {
+        summaryHTML += `
+            <div style="grid-column: span 3; border-top: 1px dashed #ccc; margin-top: 5px; padding-top: 5px;">
+                <strong>🚀 Strategia Ciclo di Vita:</strong> 
+                Inizio (${document.getElementById('startAz').value}% Az / ${document.getElementById('startObb').value}% Obb) ➔ 
+                Fine (${document.getElementById('endAz').value}% Az / ${document.getElementById('endObb').value}% Obb)
+            </div>
+        `;
+    }
+
+    grid.innerHTML = summaryHTML;
+
     let vText = "";
     document.querySelectorAll('.var-row').forEach(row => {
         let a = row.querySelector('.var-anno').value;
         let imp = row.querySelector('.var-imp').value;
-        if(a && imp) vText += `• Dall'anno ${a}: €${imp}/mese `;
+        if(a && imp) vText += `<li>Anno ${a}: incremento a <strong>€${imp}/mese</strong></li>`;
     });
-    varsList.innerHTML = vText ? `<strong>Variazioni Inserite:</strong> ${vText}` : "";
+    varsList.innerHTML = vText ? `<strong style="display:block; margin-bottom:5px;">📈 Variazioni di versamento pianificate:</strong><ul style="margin:0; padding-left:20px;">${vText}</ul>` : "";
 }
 
 function toggleComparison() {
@@ -119,7 +154,6 @@ function toggleAdvanced() {
 function toggleLifeCycleUI() {
     const isLC = document.getElementById('usaLifeCycle').checked;
     document.getElementById('tassoAnnuo').disabled = isLC;
-    document.getElementById('tasse').disabled = isLC;
 }
 
 function aggiungiVariazione() {
@@ -201,7 +235,7 @@ function calcola() {
         let diff = capLordo - snapshot.finalValue;
         document.getElementById('compareDelta').innerHTML = `Delta: <span style="color:${diff >= 0 ? 'var(--accent)' : '#ef4444'}">${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString('it-IT')}€</span>`;
     }
-    disegnaGrafico(labels, dC, dV, dS, dMax, dMin, usaStress, annoSvolta); // Passaggio annoSvolta aggiunto
+    disegnaGrafico(labels, dC, dV, dS, dMax, dMin, usaStress, annoSvolta);
 }
 
 function disegnaGrafico(l, c, v, s, mx, mn, stress, annoSvolta) {
@@ -224,7 +258,7 @@ function disegnaGrafico(l, c, v, s, mx, mn, stress, annoSvolta) {
         options: { 
             responsive: true, 
             maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false }, // Tooltip interattivo su tutto l'asse
+            interaction: { mode: 'index', intersect: false }, 
             scales: { 
                 y: { 
                     ticks: { color: '#94a3b8', callback: (val) => '€' + val.toLocaleString('it-IT') }, 
