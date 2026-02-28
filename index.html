@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WealthSim Pro - Strategic Planner</title>
+    <title data-translate="pageTitle">WealthSimPro - Strategic Planner</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -12,121 +12,127 @@
 <body>
     <div class="app-wrapper">
         <header>
-            <div class="logo">Wealth<span>Sim</span></div>
-            <div class="theme-switch-wrapper">
-                <span id="theme-label">Light Mode</span>
-                <label class="theme-switch">
-                    <input type="checkbox" id="theme-checkbox" />
-                    <div class="slider round"></div>
-                </label>
+            <div class="logo">Wealth<span>SimPro</span></div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <select id="languageSelector" style="padding: 4px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 0.75rem; cursor: pointer; font-weight: 600;">
+                    <option value="it">🇮🇹 ITA</option>
+                    <option value="en">🇬🇧 ENG</option>
+                </select>
+                <div class="theme-switch-wrapper">
+                    <span id="theme-label" data-translate="themeLight">Light Mode</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-checkbox" />
+                        <div class="slider round"></div>
+                    </label>
+                </div>
             </div>
         </header>
 
         <main class="dashboard">
             <aside class="sidebar">
                 <div class="mode-selector">
-                    <button id="btnModeSim" class="mode-btn active" onclick="switchMode('sim')">Proiezione</button>
-                    <button id="btnModeGoal" class="mode-btn" onclick="switchMode('goal')">Obiettivo</button>
+                    <button id="btnModeSim" class="mode-btn active" onclick="switchMode('sim')" data-translate="modeSim">Proiezione</button>
+                    <button id="btnModeGoal" class="mode-btn" onclick="switchMode('goal')" data-translate="modeGoal">Obiettivo</button>
                 </div>
 
                 <div id="goalSection" class="card goal-card hidden">
-                    <h3>🎯 Simulazione Obiettivo</h3>
-                    <p class="section-desc">Imposta un traguardo finanziario e lascia che il simulatore calcoli lo sforzo necessario per raggiungerlo.</p>
+                    <h3 data-translate="goalTitle">🎯 Simulazione Obiettivo</h3>
+                    <p class="section-desc" data-translate="goalDesc">Imposta un traguardo finanziario e lascia che il simulatore calcoli lo sforzo necessario per raggiungerlo.</p>
                     <div class="input-group">
-                        <label>Capitale Target Finale (€)</label>
+                        <label data-translate="goalTarget">Capitale Target Finale (€)</label>
                         <input type="text" id="goalCifra" value="100.000" oninput="formatCurrency(this)">
                     </div>
                     <div class="input-group" style="margin-top:12px;">
-                        <label>Parametro da calcolare <span class="info-tag" data-tooltip="Scegli se vuoi scoprire quanto versare ogni mese o che rendimento cercare per arrivare al target.">?</span></label>
+                        <label><span data-translate="goalParam">Parametro da calcolare</span> <span class="info-tag" data-tooltip="Scegli se vuoi scoprire quanto versare ogni mese o che rendimento cercare per arrivare al target." data-translate-tooltip="tooltipGoal">?</span></label>
                         <select id="goalType">
-                            <option value="rate">Versamento Mensile Necessario</option>
-                            <option value="yield">Rendimento Annuo Necessario</option>
+                            <option value="rate" data-translate="goalOptRate">Versamento Mensile Necessario</option>
+                            <option value="yield" data-translate="goalOptYield">Rendimento Annuo Necessario</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3>⚙️ Parametri Base</h3>
-                    <p class="section-desc">Le fondamenta del tuo piano di accumulo.</p>
+                    <h3 data-translate="baseTitle">⚙️ Parametri Base</h3>
+                    <p class="section-desc" data-translate="baseDesc">Le fondamenta del tuo piano di accumulo.</p>
                     <div class="input-grid">
                         <div class="input-group">
-                            <label>Capitale Iniziale (€)</label>
+                            <label data-translate="labelCapIni">Capitale Iniziale (€)</label>
                             <input type="text" id="capitaleIniziale" value="10.000" oninput="formatCurrency(this)">
                         </div>
                         <div class="input-group">
-                            <label>Anni Totali</label>
+                            <label data-translate="labelAnni">Anni Totali</label>
                             <input type="number" id="anni" value="20">
                         </div>
                         <div class="input-group">
-                            <label>Versamento Mensile (€)</label>
+                            <label data-translate="labelVers">Versamento Mensile (€)</label>
                             <input type="text" id="versamentoMensile" value="200" oninput="formatCurrency(this)">
                         </div>
                         <div class="input-group">
-                            <label>Rendimento % <span class="info-tag" data-tooltip="Il tasso di crescita medio annuo atteso. Esempio: 7% è una media storica azionaria.">?</span></label>
+                            <label><span data-translate="labelRend">Rendimento %</span> <span class="info-tag" data-tooltip="Il tasso di crescita medio annuo atteso. Esempio: 7% è una media storica azionaria." data-translate-tooltip="tooltipRend">?</span></label>
                             <input type="number" id="tassoAnnuo" value="7">
                         </div>
                     </div>
-                    <button id="mainUpdateBtn" class="btn-primary" onclick="triggerCalc()" style="margin-top: 15px; width: 100%;">🔄 Aggiorna Simulazione</button>
+                    <button id="mainUpdateBtn" class="btn-primary" onclick="triggerCalc()" style="margin-top: 15px; width: 100%;" data-translate="btnUpdate">🔄 Aggiorna Simulazione</button>
                 </div>
 
                 <div id="extraSections">
                     <div class="card advanced-card">
                         <div class="card-header-toggle" onclick="toggleAdvanced()">
-                            <h3 style="margin:0;">🚀 Strategia Avanzata</h3>
+                            <h3 style="margin:0;" data-translate="advTitle">🚀 Strategia Avanzata</h3>
                             <span id="advanced-icon">▼</span>
                         </div>
                         <div id="advanced-content" class="hidden" style="margin-top:15px;">
-                            <p class="section-desc">Modella il portafoglio su asset reali (Azioni/Obbligazioni).</p>
+                            <p class="section-desc" data-translate="advDesc">Modella il portafoglio su asset reali (Azioni/Obbligazioni).</p>
                             <div class="checkbox-group">
                                 <input type="checkbox" id="usaLifeCycle" onchange="toggleLifeCycleUI()">
                                 <label for="usaLifeCycle" style="font-weight:700; color:var(--accent);">
-                                    Ciclo di Vita <span class="info-tag" data-tooltip="Riduce il rischio (Azioni) man mano che ti avvicini alla fine, proteggendo i profitti. Tassazione calcolata come media ponderata sul mix di asset durante il periodo">?</span>
+                                    <span data-translate="lcLabel">Ciclo di Vita</span> <span class="info-tag" data-tooltip="Riduce il rischio (Azioni) man mano che ti avvicini alla fine, proteggendo i profitti. Tassazione calcolata come media ponderata sul mix di asset durante il periodo" data-translate-tooltip="tooltipLC">?</span>
                                 </label>
                             </div>
                             <div class="input-grid" style="margin-top:10px;">
-                                <div class="input-group"><label>Resa Az %</label><input type="number" id="rendAzioni" value="8"></div>
-                                <div class="input-group"><label>Resa Obb %</label><input type="number" id="rendObb" value="3"></div>
+                                <div class="input-group"><label data-translate="labelRendAz">Resa Az %</label><input type="number" id="rendAzioni" value="8"></div>
+                                <div class="input-group"><label data-translate="labelRendObb">Resa Obb %</label><input type="number" id="rendObb" value="3"></div>
                             </div>
-                            <p class="section-sub">Asset Mix (Inizio ➔ Fine)</p>
+                            <p class="section-sub" data-translate="advMix">Asset Mix (Inizio ➔ Fine)</p>
                             <div class="input-grid">
-                                <div class="input-group"><label>Az % Start</label><input type="number" id="startAz" value="100" oninput="syncMix('start', 'az')"></div>
-                                <div class="input-group"><label>Obb % Start</label><input type="number" id="startObb" value="0" oninput="syncMix('start', 'obb')"></div>
-                                <div class="input-group"><label>Az % Fine</label><input type="number" id="endAz" value="40" oninput="syncMix('end', 'az')"></div>
-                                <div class="input-group"><label>Obb % Fine</label><input type="number" id="endObb" value="60" oninput="syncMix('end', 'obb')"></div>
+                                <div class="input-group"><label data-translate="labelAzStart">Az % Start</label><input type="number" id="startAz" value="100" oninput="syncMix('start', 'az')"></div>
+                                <div class="input-group"><label data-translate="labelObbStart">Obb % Start</label><input type="number" id="startObb" value="0" oninput="syncMix('start', 'obb')"></div>
+                                <div class="input-group"><label data-translate="labelAzEnd">Az % Fine</label><input type="number" id="endAz" value="40" oninput="syncMix('end', 'az')"></div>
+                                <div class="input-group"><label data-translate="labelObbEnd">Obb % Fine</label><input type="number" id="endObb" value="60" oninput="syncMix('end', 'obb')"></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <h3 style="margin:0;">📈 Variazioni</h3>
+                            <h3 style="margin:0;" data-translate="varTitle">📈 Variazioni</h3>
                             <button class="btn-icon" onclick="aggiungiVariazione()">+</button>
                         </div>
-                        <p class="section-desc">Inserisci l'anno e il nuovo importo mensile (rimarrà attivo da quell'anno in poi).</p>
+                        <p class="section-desc" data-translate="varDesc">Inserisci l'anno e il nuovo importo mensile (rimarrà attivo da quell'anno in poi).</p>
                         <div id="listaVariazioni" class="variations-container"></div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3>🏦 Fisco e Inflazione</h3>
-                    <p class="section-desc">Passa dal valore nominale a quello reale (potere d'acquisto).</p>
+                    <h3 data-translate="taxTitle">🏦 Fisco e Inflazione</h3>
+                    <p class="section-desc" data-translate="taxDesc">Passa dal valore nominale a quello reale (potere d'acquisto).</p>
                     <div class="input-grid">
                         <div class="input-group">
-                            <label id="labelTasse">Tasse % <span class="info-tag" data-tooltip="In Italia: 26% su azioni/ETF, 12.5% su Titoli di Stato.">?</span></label>
+                            <label id="labelTasse"><span data-translate="labelTax">Tasse %</span> <span class="info-tag" data-tooltip="In Italia: 26% su azioni/ETF, 12.5% su Titoli di Stato." data-translate-tooltip="tooltipTax">?</span></label>
                             <input type="number" id="tasse" value="26">
                         </div>
                         <div class="input-group">
-                            <label>Inflazione % <span class="info-tag" data-tooltip="L'aumento dei prezzi che erode il valore dei soldi. Storicamente intorno al 2%.">?</span></label>
+                            <label><span data-translate="labelInf">Inflazione %</span> <span class="info-tag" data-tooltip="L'aumento dei prezzi che erode il valore dei soldi. Storicamente intorno al 2%." data-translate-tooltip="tooltipInf">?</span></label>
                             <input type="number" id="inflazione" value="2">
                         </div>
                     </div>
                     <div class="checkbox-group" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-                        <div><input type="checkbox" id="usaTasse" checked> <label for="usaTasse">Simula Tassazione Netta</label></div>
+                        <div><input type="checkbox" id="usaTasse" checked> <label for="usaTasse" data-translate="checkTax">Simula Tassazione Netta</label></div>
                         <div>
                             <input type="checkbox" id="usaStressTest"> 
                             <label for="usaStressTest" style="color:var(--fire); font-weight:700;">
-                                Monte Carlo Stress Test 
-                                <span class="info-tag" data-tooltip="Simula scenari di mercato pessimisti (-3%) e ottimisti (+4%) per darti un range di sicurezza.">?</span>
+                                <span data-translate="checkStress">Monte Carlo Stress Test</span> 
+                                <span class="info-tag" data-tooltip="Simula scenari di mercato pessimisti (-3%) e ottimisti (+4%) per darti un range di sicurezza." data-translate-tooltip="tooltipStress">?</span>
                             </label>
                         </div>
                     </div>
@@ -135,7 +141,7 @@
 
             <section class="main-content" id="report-area">
                 <div id="pdf-header-data" class="pdf-only-block" style="display:none;">
-                    <h2 style="color:var(--accent); margin-bottom:15px; border-bottom: 2px solid var(--accent); padding-bottom: 10px;">WealthSim Pro - Report Strategico</h2>
+                    <h2 style="color:var(--accent); margin-bottom:15px; border-bottom: 2px solid var(--accent); padding-bottom: 10px;" data-translate="pdfTitle">WealthSimPro - Report Strategico</h2>
                     <div id="pdf-summary-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:15px; font-size:0.85rem; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;"></div>
                     <div id="pdf-variations-list" style="margin-bottom:20px; font-size:0.8rem; color:#444; padding-left: 15px;"></div>
                 </div>
@@ -143,30 +149,30 @@
                 <div class="card info-banner" id="infoBanner">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
-                            <h3 style="margin-top:0;">📊 Benvenuto in WealthSim Pro</h3>
-                            <p>Questo strumento ti permette di visualizzare la crescita del tuo patrimonio nel tempo. Puoi simulare <strong>piani di accumulo (PAC)</strong>, gestire il rischio con il <strong>Ciclo di Vita</strong> e vedere come <strong>tasse e inflazione</strong> impattano sulla tua ricchezza reale futura.</p>
+                            <h3 style="margin-top:0;" data-translate="infoTitle">📊 Benvenuto in WealthSimPro</h3>
+                            <p data-translate="infoDesc">Questo strumento ti permette di visualizzare la crescita del tuo patrimonio nel tempo. Puoi simulare <strong>piani di accumulo (PAC)</strong>, gestire il rischio con il <strong>Ciclo di Vita</strong> e vedere come <strong>tasse e inflazione</strong> impattano sulla tua ricchezza reale futura.</p>
                         </div>
                         <button onclick="document.getElementById('infoBanner').style.display='none'" class="close-info">×</button>
                     </div>
                 </div>
 
                 <div class="top-stats">
-                    <div class="stat-card"><small>Lordo Finale</small><h2 id="risultatoLordo">€ 0</h2></div>
-                    <div class="stat-card"><small>Netto Tassato</small><h2 id="risultatoNettoTasse">€ 0</h2></div>
-                    <div class="stat-card highlight"><small>Valore Reale</small><h2 id="risultatoNettoReale">€ 0</h2><span class="stat-desc">Potere d'acquisto effettivo</span></div>
-                    <div class="stat-card fire"><small>Rendita Mensile</small><h2 id="renditaFuoco">€ 0</h2><span class="stat-desc">Prelievo sicuro (4%)</span></div>
+                    <div class="stat-card"><small data-translate="statGross">Lordo Finale</small><h2 id="risultatoLordo">€ 0</h2></div>
+                    <div class="stat-card"><small data-translate="statNet">Netto Tassato</small><h2 id="risultatoNettoTasse">€ 0</h2></div>
+                    <div class="stat-card highlight"><small data-translate="statReal">Valore Reale</small><h2 id="risultatoNettoReale">€ 0</h2><span class="stat-desc" data-translate="statRealDesc">Potere d'acquisto effettivo</span></div>
+                    <div class="stat-card fire"><small data-translate="statRent">Rendita Mensile</small><h2 id="renditaFuoco">€ 0</h2><span class="stat-desc" data-translate="statRentDesc">Prelievo sicuro (4%)</span></div>
                 </div>
 
                 <div class="card chart-card">
                     <div class="chart-header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div class="badge-container" style="position: relative;">
                             <div id="puntoSvoltaBadge" class="badge">--</div>
-                            <div class="tooltip-text">✨ <strong>Il Punto di Svolta:</strong> Questo è il momento magico in cui i rendimenti generati dai tuoi soldi superano i tuoi versamenti mensili. Da qui in poi, il capitale lavora più duramente di te!</div>
+                            <div class="tooltip-text" data-translate="ttSvolta">✨ <strong>Il Punto di Svolta:</strong> Questo è il momento magico in cui i rendimenti generati dai tuoi soldi superano i tuoi versamenti mensili. Da qui in poi, il capitale lavora più duramente di te!</div>
                         </div>
                         <div class="compare-controls" style="display: flex; align-items: center; gap: 10px;">
                             <div id="compareDelta" class="compare-badge hidden"></div>
-                            <button id="btnCompara" class="btn-outline" onclick="toggleComparison()">⚖️ Compara Scenari</button>
-                            <button id="btnDownloadPDF" class="btn-primary" onclick="downloadPDF()" style="padding: 6px 15px; font-size: 0.75rem;">📥 Scarica Report PDF</button>
+                            <button id="btnCompara" class="btn-outline" onclick="toggleComparison()" data-translate="btnCompare">⚖️ Compara Scenari</button>
+                            <button id="btnDownloadPDF" class="btn-primary" onclick="downloadPDF()" style="padding: 6px 15px; font-size: 0.75rem;" data-translate="btnPdf">📥 Scarica Report PDF</button>
                         </div>
                     </div>
                     <div class="chart-container"><canvas id="graficoInteresse"></canvas></div>
@@ -183,9 +189,10 @@
                 </div>
             </section>
         </main>
-    </div> <footer style="margin-top: 40px; padding: 20px; text-align: center; font-size: 0.85rem; color: #64748b; border-top: 1px solid #e2e8f0; background: #f8fafc; border-radius: 8px;">
-        <p>&copy; 2026 WealthSim Pro. Tutti i diritti riservati.</p>
-        <p style="max-width: 900px; margin: 10px auto; line-height: 1.5;">
+    </div> 
+    <footer style="margin-top: 40px; padding: 20px; text-align: center; font-size: 0.85rem; color: #64748b; border-top: 1px solid #e2e8f0; background: #f8fafc; border-radius: 8px;">
+        <p><span data-translate="footerRights">&copy; 2026 WealthSimPro. Tutti i diritti riservati.</span></p>
+        <p style="max-width: 900px; margin: 10px auto; line-height: 1.5;" data-translate="footerDisclaimer">
             <strong>Disclaimer:</strong> Il simulatore ha scopo puramente illustrativo e non costituisce consulenza finanziaria o sollecitazione al pubblico risparmio. 
             I rendimenti passati non sono garanzia di rendimenti futuri. 
             Le simulazioni si basano su tassi medi stimati e non tengono conto di commissioni bancarie o costi di gestione dei fondi. 
