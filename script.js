@@ -181,27 +181,36 @@ function calcola() {
     let capLordo = capIni, totVersato = capIni, intSempliceAccum = 0, labels = ["T0"], dC = [capIni], dV = [capIni], dS = [capIni], dMax = [capIni], dMin = [capIni], annoSvolta = null;
     let capMax = capIni, capMin = capIni, aliquotaFinalePesata = 0, currentVersMese = versBase;
 
-    for (let a = 1; a <= anni; a++) {
-        let tAnnuo, qAz;
-        if (usaLC) {
-            let sAz = (parseFloat(document.getElementById('startAz').value) || 0)/100, eAz = (parseFloat(document.getElementById('endAz').value) || 0)/100;
-            qAz = sAz + (eAz - sAz) * ((a-1)/(anni-1||1));
-            tAnnuo = qAz * (parseFloat(document.getElementById('rendAzioni').value)/100) + (1-qAz) * (parseFloat(document.getElementById('rendObb').value)/100);
-            if (a === anni) aliquotaFinalePesata = (qAz * 0.26) + ((1-qAz) * 0.125);
-        } else {
-            tAnnuo = (parseFloat(document.getElementById('tassoAnnuo').value) || 0) / 100;
-            aliquotaFinalePesata = (parseFloat(document.getElementById('tasse').value) || 0) / 100;
-        }
-        if (variazioni[a] !== undefined) currentVersMese = variazioni[a];
-        let inizioCap = capLordo, vAnno = 0;
-        for (let m = 1; m <= 12; m++) {
-            capLordo = (capLordo * (1 + tAnnuo/12)) + currentVersMese;
-            capMax = (capMax * (1 + (tAnnuo+0.04)/12)) + currentVersMese;
-            capMin = (capMin * (1 + (tAnnuo-0.03)/12)) + currentVersMese;
-            totVersato += currentVersMese; vAnno += currentVersMese;
-            intSempliceAccum += (totVersato * (tAnnuo/12));
-        }
-        let resa = capLordo - inizioCap - vAnno;
+    // ...
+        let sommaAliquoteAnnue = 0; // Nuova variabile per la media
+
+        for (let a = 1; a <= anni; a++) {
+            let tAnnuo, qAz, aliquotaAnnoCorrente;
+            if (usaLC) {
+                let sAz = (parseFloat(document.getElementById('startAz').value) || 0)/100;                
+                let eAz = (parseFloat(document.getElementById('endAz').value) || 0)/100;
+                qAz = sAz + (eAz - sAz) * ((a-1)/(anni-1||1));
+                tAnnuo = qAz * (parseFloat(document.getElementById('rendAzioni').value)/100) + (1-qAz) * (parseFloat(document.getElementById('rendObb').value)/100);                
+                aliquotaAnnoCorrente = (qAz * 0.26) + ((1-qAz) * 0.125);
+            } else {
+                tAnnuo = (parseFloat(document.getElementById('tassoAnnuo').value) || 0) / 100;                
+                aliquotaAnnoCorrente = (parseFloat(document.getElementById('tasse').value) || 0) / 100;
+            }
+            
+            // Accumuliamo l'aliquota dell'anno per la media finale
+            sommaAliquoteAnnue += aliquotaAnnoCorrente;
+            
+            if (variazioni[a] !== undefined) currentVersMese = variazioni[a];                
+            let inizioCapAnno = capLordo, vAnno = 0;                
+            for (let m = 1; m <= 12; m++) {                
+                capLordo = (capLordo * (1 + tAnnuo/12)) + currentVersMese;                
+                capMax = (capMax * (1 + (tAnnuo+0.04)/12)) + currentVersMese;                
+                capMin = (capMin * (1 + (tAnnuo-0.03)/12)) + currentVersMese;                
+                totVersato += currentVersMese; vAnno += currentVersMese;                
+                intSempliceAccum += (totVersato * (tAnnuo/12));                
+            }                
+            let resa = capLordo - inizioCapAnno - vAnno;                
+            // ...
         if(!annoSvolta && resa > vAnno) annoSvolta = a;
         labels.push("A"+a); dC.push(capLordo); dV.push(totVersato); dS.push(totVersato + intSempliceAccum); dMax.push(capMax); dMin.push(capMin);
         let tdDeltaHTML = "";
@@ -222,8 +231,15 @@ function calcola() {
         <td>-</td>
     </tr>`;
 
-    lastCalculatedLordo = capLordo;
-    let plusvalenza = Math.max(0, capLordo - totVersato), netto = usaNetto ? capLordo - (plusvalenza * aliquotaFinalePesata) : capLordo, reale = netto / Math.pow(1 + tassoInfl, anni);
+    lastCalculatedLordo = capLordo;                
+    
+    // CALCOLO TASSE REALISTICO: Aliquota media su plusvalenza totale finale
+    let plusvalenzaTotale = Math.max(0, capLordo - totVersato);                
+    let aliquotaMediaGenerale = sommaAliquoteAnnue / anni;                
+    let tasseFinali = plusvalenzaTotale * aliquotaMediaGenerale;                
+    let netto = usaNetto ? capLordo - tasseFinali : capLordo;
+    let reale = netto / Math.pow(1 + tassoInfl, anni);                
+    
     document.getElementById("risultatoLordo").innerText = "€" + Math.round(capLordo).toLocaleString('it-IT');
     document.getElementById("risultatoNettoTasse").innerText = "€" + Math.round(netto).toLocaleString('it-IT');
     document.getElementById("risultatoNettoReale").innerText = "€" + Math.round(reale).toLocaleString('it-IT');
