@@ -293,3 +293,67 @@ tfoot td { color: var(--text-main); padding: 12px 10px; }
 /* Ripete l'intestazione su ogni pagina PDF */
 .is-generating-pdf thead { display: table-header-group !important; } 
 .is-generating-pdf tfoot { display: table-footer-group !important; }
+/* =========================================
+   OTTIMIZZAZIONE PER MOBILE (Vertical Stack)
+   ========================================= */
+@media (max-width: 900px) {
+    /* Trasforma la griglia della dashboard in una colonna singola */
+    .dashboard {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* La sidebar (input) ora occupa tutta la larghezza */
+    .sidebar {
+        width: 100%;
+        order: 1; /* Appare per prima */
+    }
+
+    /* L'area dei risultati appare sotto gli input */
+    .main-content {
+        width: 100%;
+        order: 2;
+    }
+
+    /* Ridimensiona le card statistiche (2 per riga invece di 4) */
+    .top-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    /* Ottimizza l'header (logo e selettori) */
+    header {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        text-align: center;
+    }
+
+    /* Riduce leggermente l'altezza del grafico per non riempire troppo lo schermo */
+    .chart-container {
+        height: 300px;
+    }
+
+    /* Rende le tabelle più facili da scorrere su schermi piccoli */
+    .table-scroll {
+        margin-top: 5px;
+        border-radius: 8px;
+    }
+    
+    /* Riduce i margini del wrapper principale per guadagnare spazio laterale */
+    .app-wrapper {
+        padding: 10px;
+    }
+}
+
+/* Fix specifico per schermi molto piccoli (Smartphone mini) */
+@media (max-width: 480px) {
+    .top-stats {
+        grid-template-columns: 1fr; /* Una card statistica per riga */
+    }
+    
+    .input-grid {
+        grid-template-columns: 1fr; /* Input uno sotto l'altro */
+    }
+}
